@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 import os
 from glob import glob
 
@@ -7,7 +7,7 @@ package_name = 'mypkg'
 setup(
     name=package_name,
     version='0.0.0',
-    packages=[package_name],
+    packages=find_packages(include=['mypkg']),
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
@@ -22,8 +22,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'talker = mypkg.talker:main', #talker.pyのmain関数という意味
-            'listener = mypkg.listener:main'
+            'temperature = mypkg.temperature:main', #talker.pyのmain関数という意味
         ],
     },
 )                                             

@@ -1,13 +1,29 @@
-name: test
-on: push
+name: Test
+
+on: 
+  push:
+    branches:
+      - main   # 必要なら特定のブランチに限定
+  pull_request:
+
 jobs:
-　test:
+  test:
     runs-on: ubuntu-22.04
-    container: ryuichiueda/ubuntu22.04-ros2:latest #前ページのコンテナを使うという宣言
-    steps:　
-      - uses: actions/checkout@v2    #コンテナのカレントディレクトリにリポジトリを配置
-      - name: build and test
+    container: ryuichiueda/ubuntu22.04-ros2:latest # ROS 2コンテナイメージを指定
+    steps:
+      - uses: actions/checkout@v2    # リポジトリをチェックアウト
+      - name: Install dependencies
         run: |
-          rsync -av ./ /root/ros2_ws/src/mypkg/    # リポジトリの下をros2_ws下にコピー
-          cd /root/ros2_ws　 #↓追加のパッケージが必要なら実行前にrosdep
-          bash -xv ./src/mypkg/test/test.bash /root #実行
+          apt-get update
+          apt-get install -y python3-pip
+          rosdep update
+          rosdep install --from-paths src --ignore-src -r -y
+      - name: Build and Test
+        run: |
+          mkdir -p /root/ros2_ws/src/mypkg/
+          rsync -av ./ /root/ros2_ws/src/mypkg/    # リポジトリ内容をROSワークスペースにコピー
+          cd /root/ros2_ws
+          colcon build --packages-select mypkg
+          source install/setup.bash
+          bash -xv ./src/mypkg/test/test.bash /root
+
